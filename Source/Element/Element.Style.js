@@ -32,18 +32,7 @@ var returnsBordersInWrongOrder = el.style.border != border;
 el = null;
 //</ltIE9>
 
-var hasGetComputedStyle = !!window.getComputedStyle,
-	brokenGetComputedStyle; // Opera rounds sub-pixel values
-
-if (hasGetComputedStyle){
-	var el = document.createElement('div');
-	el.style.display = 'none';
-	el.style.paddingLeft = '1.5px';
-	document.html.appendChild(el);
-	brokenGetComputedStyle = window.getComputedStyle(el, null).paddingLeft != el.style.paddingLeft;
-	document.html.removeChild(el);
-	el = null;
-}
+var hasGetComputedStyle = !!window.getComputedStyle;
 
 Element.Properties.styles = {set: function(styles){
 	this.setStyles(styles);
@@ -89,7 +78,7 @@ var floatName = (html.style.cssFloat == null) ? 'styleFloat' : 'cssFloat';
 Element.implement({
 
 	getComputedStyle: function(property){
-		if ((!hasGetComputedStyle || brokenGetComputedStyle) && this.currentStyle) return this.currentStyle[property.camelCase()];
+		if (!hasGetComputedStyle && this.currentStyle) return this.currentStyle[property.camelCase()];
 		var defaultView = Element.getDocument(this).defaultView,
 			computed = defaultView ? defaultView.getComputedStyle(this, null) : null;
 		return (computed) ? computed.getPropertyValue((property == floatName) ? 'float' : property.hyphenate()) : null;
@@ -138,7 +127,7 @@ Element.implement({
 			var color = result.match(/rgba?\([\d\s,]+\)/);
 			if (color) result = result.replace(color[0], color[0].rgbToHex());
 		}
-		if ((!hasGetComputedStyle || brokenGetComputedStyle) && !this.style[property]){
+		if (!hasGetComputedStyle && !this.style[property]){
 			if ((/^(height|width)$/).test(property) && !(/px$/.test(result))){
 				var values = (property == 'width') ? ['left', 'right'] : ['top', 'bottom'], size = 0;
 				values.each(function(value){
